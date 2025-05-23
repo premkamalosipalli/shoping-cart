@@ -1,0 +1,81 @@
+.App {
+  text-align: center;
+}
+
+.App ul {
+  display: flex;
+  justify-content: center;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  gap: 30px;
+}
+
+.App ul li button {
+  display: block;
+  padding: 8px 16px;
+  background-color: #dddddd;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.display-items {
+  display: inline-block;
+  margin: 8px auto;
+  border-collapse: collapse;
+}
+
+.display-items th,
+.display-items td {
+  padding: 8px;
+  border: 1px solid black;
+}
+.add-item {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 16px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-family: sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.form-row label {
+  min-width: 120px;
+  font-weight: bold;
+}
+
+.form-row input,
+.form-row select {
+  flex: 1;
+  padding: 6px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.add-item button {
+  align-self: center;
+  padding: 8px 16px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.add-item button:hover {
+  background-color: #45a049;
+}

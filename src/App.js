@@ -1,32 +1,71 @@
 import './App.css';
 import { useState } from 'react';
+import ListItems from './ListItems';
+import ItemForm from './ItemForm';
 
 function App() {
-  const item = [{
-    id: 1,
+  const defaultItem = [{
+    id: Date.now(),
     name:"Bread",
     imageUrl:"https://media.istockphoto.com/id/522566233/photo/toast-bread.jpg?s=612x612&w=0&k=20&c=Dk7k60QaB4fVik7OyO9LQGi_a_2vEAdKX7GBJDzqskw=",
     count: 1,
     purchased: false
   }];
 
-  const [items,setItems] = useState(item);
-  const [showItems, setShowItems] = useState(false);
-  const [showAddItem, setShowAddItem] = useState(false);
+  const [items,setItems] = useState(()=>{
+    const stored = localStorage.getItem("shoppingCart");
+    return stored ? JSON.parse(stored) : defaultItem;
+  });
+  const [viewMode, setViewMode] = useState("list" | "add" | "update");
+  const [notificationType, setNotificationType] = useState("info"); // "success", "error", etc.
+
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [notification, setNotification] = useState("");
+  
 
   function handleListItems(){
-    setItems(item);
-    setShowItems(true);
-    setShowAddItem(false);
+    setViewMode("list")
   }
 
   function handleAddItem(){
-    setShowItems(false);
-    setShowAddItem(true);
+    setViewMode("add");
   }
 
+  function handleUpdateItem(){
+    setViewMode("update")
+  }
+
+  function handleDeleteItem() {
+    if (!selectedItem) return;
+
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete ${selectedItem.name} from Items?`
+    );
+
+    if (confirmDelete) {
+      const deletedItems = items.filter(item => item.id !== selectedItem.id);
+      setItems(deletedItems);
+      localStorage.setItem("shoppingCart", JSON.stringify(deletedItems));
+
+      setNotification("Item Deleted Successfully!");
+      setNotificationType("error")
+      setTimeout(()=>setNotification(""), 3000);
+      setSelectedItem(null);
+      setViewMode("list");
+    }
+  }
+
+
   return (
+    
     <div className='App'>
+    {notification && (
+      <p className={`notification ${notificationType}`}>
+        {notification}
+      </p>
+    )}
+
+
       <h1> Interactive Shoping Cart</h1>
       <hr />
       <ul>
@@ -37,106 +76,65 @@ function App() {
           <button onClick={handleAddItem}>Add Item</button>
         </li>
         <li>
-          <button>Update Item</button>
+          {selectedItem && <button onClick={handleUpdateItem}>Update Item</button>}
         </li>
         <li>
-          <button>Delete Item</button>
+          {selectedItem && <button onClick={handleDeleteItem}>Delete Item</button>}
         </li>
       </ul>
       <hr />
+      {viewMode === "list" && <ListItems 
+        items={items} 
+        selectedItem={selectedItem} 
+        setSelectedItem={setSelectedItem}
+        setNotificationType={setNotificationType}
+      />
+      }
+
+      {/* {viewMode === "add" && <AddItem
+        setItems={setItems}
+        items={items}
+        setNotification={setNotification}
+        setNotificationType={setNotificationType}
+        setViewMode={setViewMode}
+      />
+      }
       
-      {showAddItem && <AddItem newItem={onSubmitNewItem}/>}
-      {showItems && <ItemList items={items} />}
+      {viewMode === "update" &&  <UpdateItem
+        selectedItem={selectedItem}
+        setItems={setItems}
+        items={items} 
+        setNotification={setNotification}
+        setNotificationType={setNotificationType}
+        setViewMode={setViewMode}
+      />} */}
+
+      {viewMode === "add" && (
+        <ItemForm
+          mode="add"
+          items={items}
+          setItems={setItems}
+          setNotification={setNotification}
+          setNotificationType={setNotificationType}
+          setViewMode={setViewMode}
+        />
+      )}
+
+      {viewMode === "update" && selectedItem && (
+        <ItemForm
+          mode="update"
+          initialItem={selectedItem}   
+          items={items}
+          setItems={setItems}
+          setNotification={setNotification}
+          setNotificationType={setNotificationType}
+          setViewMode={setViewMode}
+        />
+      )}
+
+
     </div>
   );
 }
 
 export default App;
-
-function ItemList({items}){
-  return(
-    <table className='display-items'>
-      <thead>
-        <tr>
-          <th></th>
-          <th>ITEM</th>
-          <th>COUNT</th>
-          <th>PURCHASED</th>
-          <th>SELECTED</th>
-        </tr>
-      </thead>
-      <tbody>
-        {
-          items.map(item => {
-            return(
-                
-                <tr key={item.id}>
-                  <td><img src={item.imageUrl} alt={item.name} width={50} height={50}/></td>
-                  <td>{item.name}</td>
-                  <td>{item.count}</td>
-                  <td>{
-                  item.purchased 
-                  ? <i className="fa-solid fa-check"></i> 
-                  : <i className="fa-solid fa-xmark"></i>
-                  }</td>
-                  <td><input type="checkbox"/></td>
-                </tr>
-            );
-          })
-        }
-      </tbody>
-    </table>
-  )
-}
-
-function handleAddFormSubmit(){
-  alert("form clicked..!")
-}
-
-function AddItem({id, name, imageUrl, count, purchased}){
-  const [itemName, setItemName] = useState("");
-  const [quantity, setQuantity] = useState(1)
-  const [purchased, setPurchase] = useState(false);
-
-  function handleAddFormSubmit(e){
-    e.preventDefault();
-    console.log(itemName+":"+quantity+":"+purchased);
-    setItemName("")
-    setPurchase(false);
-    setQuantity(1);
-  }
-
-  return (
-  <>
-      <h2>Fill the form below to add an item</h2>
-      <form className="add-item" onSubmit={handleAddFormSubmit}>
-        <div className="form-row">
-          <label>Enter Name:</label>
-          <input type="text" placeholder="Enter Item Name" value={itemName} onChange={(e)=>setItemName(e.target.value)} required/>
-        </div>
-
-        <div className="form-row">
-          <label>Upload Image:</label>
-          <input type="file" accept='.jpg, .png' />
-        </div>
-
-        <div className="form-row">
-          <label>Quantity:</label>
-          <input type="number" min="1" max="10" value={quantity} onChange={(e)=>setQuantity(e.target.value)}/>
-        </div>
-
-        <div className="form-row">
-          <label>Purchased:</label>
-          <select  value={purchased} onChange={(e)=>setPurchase(e.target.value)}>
-            <option>select</option>
-            <option>True</option>
-            <option>False</option>
-          </select>
-        </div>
-
-        <button type="submit">Submit</button>
-      </form>
-
-    </>
-  )
-}

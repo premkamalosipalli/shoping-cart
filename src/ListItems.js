@@ -2,7 +2,11 @@ function ListItems({items, selectedItem, setSelectedItem}){
     
 
     function handleItemSelected(itemId){
+      if(selectedItem?.id === itemId){
+        setSelectedItem(null);
+      }else{
         setSelectedItem(items.find(item => item.id === itemId));
+      }
     }
 
   return(

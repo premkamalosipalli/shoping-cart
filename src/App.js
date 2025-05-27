@@ -17,7 +17,7 @@ function App() {
     return stored ? JSON.parse(stored) : defaultItem;
   });
   const [viewMode, setViewMode] = useState("list" | "add" | "update");
-  const [notificationType, setNotificationType] = useState("info"); // "success", "error", etc.
+  const [notificationType, setNotificationType] = useState("info");
 
   const [selectedItem, setSelectedItem] = useState(null);
   const [notification, setNotification] = useState("");
@@ -59,10 +59,11 @@ function App() {
   return (
     
     <div className='App'>
+    
     {notification && (
-      <p className={`notification ${notificationType}`}>
+      <div className={`simple-toast ${notificationType}`}>
         {notification}
-      </p>
+      </div>
     )}
 
 
@@ -90,24 +91,6 @@ function App() {
         setNotificationType={setNotificationType}
       />
       }
-
-      {/* {viewMode === "add" && <AddItem
-        setItems={setItems}
-        items={items}
-        setNotification={setNotification}
-        setNotificationType={setNotificationType}
-        setViewMode={setViewMode}
-      />
-      }
-      
-      {viewMode === "update" &&  <UpdateItem
-        selectedItem={selectedItem}
-        setItems={setItems}
-        items={items} 
-        setNotification={setNotification}
-        setNotificationType={setNotificationType}
-        setViewMode={setViewMode}
-      />} */}
 
       {viewMode === "add" && (
         <ItemForm

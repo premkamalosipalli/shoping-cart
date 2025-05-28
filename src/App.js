@@ -19,7 +19,9 @@ function App() {
   const [viewMode, setViewMode] = useState("list" | "add" | "update");
   const [notificationType, setNotificationType] = useState("info");
 
-  const [selectedItem, setSelectedItem] = useState(null);
+  // const [selectedItem, setSelectedItem] = useState(null);
+
+  const [selectedIds, setSelectedIds] = useState([]);
   const [notification, setNotification] = useState("");
   
 
@@ -36,24 +38,26 @@ function App() {
   }
 
   function handleDeleteItem() {
-    if (!selectedItem) return;
+    if (!selectedIds || selectedIds.length === 0) return;
 
     const confirmDelete = window.confirm(
-      `Are you sure you want to delete ${selectedItem.name} from Items?`
+      `Are you sure you want to delete ${selectedIds.length} item(s) from the list?`
     );
 
     if (confirmDelete) {
-      const deletedItems = items.filter(item => item.id !== selectedItem.id);
-      setItems(deletedItems);
-      localStorage.setItem("shoppingCart", JSON.stringify(deletedItems));
+      const updatedItems = items.filter(item => !selectedIds.includes(item.id));
+      setItems(updatedItems);
+      localStorage.setItem("shoppingCart", JSON.stringify(updatedItems));
 
-      setNotification("Item Deleted Successfully!");
-      setNotificationType("error")
-      setTimeout(()=>setNotification(""), 3000);
-      setSelectedItem(null);
+      setNotification(`${selectedIds.length} item(s) deleted successfully!`);
+      setNotificationType("error");
+      setTimeout(() => setNotification(""), 3000);
+
+      setSelectedIds([]); // Clear selection
       setViewMode("list");
     }
   }
+
 
 
   return (
@@ -77,17 +81,17 @@ function App() {
           <button onClick={handleAddItem}>Add Item</button>
         </li>
         <li>
-          {selectedItem && <button onClick={handleUpdateItem}>Update Item</button>}
+          {selectedIds.length === 1 && <button onClick={handleUpdateItem}>Update Item</button>}
         </li>
         <li>
-          {selectedItem && <button onClick={handleDeleteItem}>Delete Item</button>}
+          {selectedIds.length > 0 && <button onClick={handleDeleteItem}>Delete Item</button>}
         </li>
       </ul>
       <hr />
       {viewMode === "list" && <ListItems 
         items={items} 
-        selectedItem={selectedItem} 
-        setSelectedItem={setSelectedItem}
+        selectedIds={selectedIds} 
+        setSelectedIds={setSelectedIds}
         setNotificationType={setNotificationType}
       />
       }
@@ -103,10 +107,10 @@ function App() {
         />
       )}
 
-      {viewMode === "update" && selectedItem && (
+      {viewMode === "update" && (
         <ItemForm
           mode="update"
-          initialItem={selectedItem}   
+          selectedIds={selectedIds}   
           items={items}
           setItems={setItems}
           setNotification={setNotification}

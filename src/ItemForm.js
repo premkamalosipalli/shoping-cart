@@ -2,13 +2,18 @@ import { useState } from "react";
 
 function ItemForm({
   mode,
-  initialItem,
+  selectedIds,
   items,
   setItems,
   setNotification,
   setNotificationType,
   setViewMode,
 }) {
+
+  const initialItem = mode === "update"
+  ? items.find(item => item.id === selectedIds[0])
+  : null;
+
   const [itemName, setItemName] = useState(
     mode === "update" ? initialItem.name : ""
   );
@@ -22,7 +27,8 @@ function ItemForm({
     mode === "update" ? initialItem.purchased : false
   );
   const [error, setError] = useState("");
-  const [disable, isDisabled] = useState(mode !== "update");
+  const [isDisabled, setIsDisabled] = useState(mode !== "update");
+
 
   function handleFormSubmit(e) {
     e.preventDefault();
@@ -85,13 +91,13 @@ function handlePurchased(e) {
     const file = e.target.files[0];
     if (!file) {
       setError("No file selected.");
-      isDisabled(true);
+      setIsDisabled(true);
       return;
     }
 
     if (file.size > 1024 * 1024) {
       setError("File is too large!");
-      isDisabled(true);
+      setIsDisabled(true);
       return;
     }
 
@@ -106,28 +112,28 @@ function handlePurchased(e) {
   function validateForm(name = itemName, qty = quantity, img = imageUrl, pur = purchased) {
     if (name.trim() === "") {
       setError("Item name cannot be empty.");
-      isDisabled(true);
+      setIsDisabled(true);
       return false;
     }
     if (!img) {
       setError("Image must be uploaded.");
-      isDisabled(true);
+      setIsDisabled(true);
       return false;
     }
     const count = Number(qty);
     if (isNaN(count) || count <= 0 || count > 10) {
       setError("Quantity must be between 1 and 10.");
-      isDisabled(true);
+      setIsDisabled(true);
       return false;
     }
     if (pur === null || pur === "") {
       setError("Purchase must be selected.");
-      isDisabled(true);
+      setIsDisabled(true);
       return false;
     }
 
     setError("");
-    isDisabled(false);
+    setIsDisabled(false);
     return true;
   }
 
@@ -180,7 +186,7 @@ function handlePurchased(e) {
           </select>
         </div>
 
-        <button type="submit" disabled={disable}>
+        <button type="submit" disabled={isDisabled}>
           {mode === "update" ? "Update" : "Submit"}
         </button>
 

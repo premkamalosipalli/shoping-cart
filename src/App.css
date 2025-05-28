@@ -44,6 +44,14 @@
   gap: 12px;
 }
 
+.item-count {
+  margin-top: 1rem;
+  font-weight: bold;
+  font-size: 1.1rem;
+  text-align: center;
+  color: gray; /* Default color */
+}
+
 .form-row {
   display: flex;
   align-items: center;

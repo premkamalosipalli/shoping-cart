@@ -12,14 +12,18 @@ function App() {
     purchased: false
   }];
 
-  const [items,setItems] = useState(()=>{
-    const stored = localStorage.getItem("shoppingCart");
-    return stored ? JSON.parse(stored) : defaultItem;
+  const [items, setItems] = useState(() => {
+  const stored = localStorage.getItem("shoppingCart");
+  if (stored) {
+      return JSON.parse(stored);
+    } else {
+      localStorage.setItem("shoppingCart", JSON.stringify(defaultItem));
+      return defaultItem;
+    }
   });
+
   const [viewMode, setViewMode] = useState("list" | "add" | "update");
   const [notificationType, setNotificationType] = useState("info");
-
-  // const [selectedItem, setSelectedItem] = useState(null);
 
   const [selectedIds, setSelectedIds] = useState([]);
   const [notification, setNotification] = useState("");
@@ -58,8 +62,6 @@ function App() {
     }
   }
 
-
-
   return (
     
     <div className='App'>
@@ -81,10 +83,10 @@ function App() {
           <button onClick={handleAddItem}>Add Item</button>
         </li>
         <li>
-          {selectedIds.length === 1 && <button onClick={handleUpdateItem}>Update Item</button>}
+          <button disabled={(selectedIds.length !== 1)} onClick={handleUpdateItem}>Update Item</button>
         </li>
         <li>
-          {selectedIds.length > 0 && <button onClick={handleDeleteItem}>Delete Item</button>}
+          <button disabled={!(selectedIds.length>0)} onClick={handleDeleteItem}>Delete Item</button>
         </li>
       </ul>
       <hr />

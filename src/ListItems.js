@@ -1,31 +1,40 @@
 import { useState } from "react";
-function ListItems({ items, selectedIds, setSelectedIds }) {
+export default function ListItems({ items, selectedIds, dispatch }) {
   const [query, setQuery] = useState("");
 
+  const filteredItems = items.filter((item) =>
+    item.name.toLowerCase().includes(query.toLowerCase())
+  );
+
   function handleSelectedIds(itemId) {
-    if (selectedIds.includes(itemId)) {
-      setSelectedIds(selectedIds.filter((id) => id !== itemId));
-    } else {
-      setSelectedIds([...selectedIds, itemId]);
-    }
+    const updateSelection = selectedIds.includes(itemId)
+      ? selectedIds.filter((id) => id !== itemId)
+      : [...selectedIds, itemId];
+
+    dispatch({
+      type: "SET_SELECTED_IDS",
+      payload: updateSelection,
+    });
   }
 
   function handleSelectAll() {
     //Todo: check if all items are selected if clicked again deselect all
     if (filteredItems.length === selectedIds.length) {
-      setSelectedIds([]);
+      dispatch({
+        type: "SET_SELECTED_IDS",
+        payload: [],
+      });
     } else {
-      setSelectedIds(filteredItems.map((item) => item.id));
+      dispatch({
+        type: "SET_SELECTED_IDS",
+        payload: filteredItems.map((item) => item.id),
+      });
     }
   }
 
   function handleSearchItem(e) {
     setQuery(e.target.value);
   }
-
-  const filteredItems = items.filter((item) =>
-    item.name.toLowerCase().includes(query.toLowerCase())
-  );
 
   return (
     <>
@@ -97,5 +106,3 @@ function ListItems({ items, selectedIds, setSelectedIds }) {
     </>
   );
 }
-
-export default ListItems;

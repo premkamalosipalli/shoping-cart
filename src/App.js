@@ -1,127 +1,106 @@
-import './App.css';
-import { useState } from 'react';
-import ListItems from './ListItems';
-import ItemForm from './ItemForm';
+import "./App.css";
+import { useEffect, useReducer } from "react";
+import ListItems from "./ListItems";
+import ItemForm from "./ItemForm";
+import { shoppingCartReducer } from "./shoppingCartReducer";
 
 function App() {
-  const defaultItem = [{
-    id: Date.now(),
-    name:"Bread",
-    imageUrl:"https://media.istockphoto.com/id/522566233/photo/toast-bread.jpg?s=612x612&w=0&k=20&c=Dk7k60QaB4fVik7OyO9LQGi_a_2vEAdKX7GBJDzqskw=",
-    count: 1,
-    purchased: false
-  }];
+  const initialState = {
+    items: JSON.parse(localStorage.getItem("shoppingCart") || "[]"),
+    selectedIds: [],
+    viewMode: "LIST_ITEM",
+    notification: "",
+    notificationType: "info",
+  };
 
-  const [items, setItems] = useState(() => {
-  const stored = localStorage.getItem("shoppingCart");
-  if (stored) {
-      return JSON.parse(stored);
-    } else {
-      localStorage.setItem("shoppingCart", JSON.stringify(defaultItem));
-      return defaultItem;
-    }
-  });
+  const [state, dispatch] = useReducer(shoppingCartReducer, initialState);
 
-  const [viewMode, setViewMode] = useState("list" | "add" | "update");
-  const [notificationType, setNotificationType] = useState("info");
+  useEffect(() => {
+    localStorage.setItem("shoppingCart", JSON.stringify(state.items));
+  }, [state.items]);
 
-  const [selectedIds, setSelectedIds] = useState([]);
-  const [notification, setNotification] = useState("");
-  
-
-  function handleListItems(){
-    setViewMode("list")
+  function handleAddItem() {
+    dispatch({
+      type: "SET_VIEW_MODE",
+      payload: "ADD_ITEM",
+    });
   }
 
-  function handleAddItem(){
-    setViewMode("add");
-  }
-
-  function handleUpdateItem(){
-    setViewMode("update")
+  function handleUpdateItem() {
+    dispatch({
+      type: "SET_VIEW_MODE",
+      payload: "UPDATE_ITEM",
+    });
   }
 
   function handleDeleteItem() {
-    if (!selectedIds || selectedIds.length === 0) return;
-
     const confirmDelete = window.confirm(
-      `Are you sure you want to delete ${selectedIds.length} item(s) from the list?`
+      `Are you sure you want to delete ${state.selectedIds.length} item(s)?`
     );
+    if (!confirmDelete) return;
 
-    if (confirmDelete) {
-      const updatedItems = items.filter(item => !selectedIds.includes(item.id));
-      setItems(updatedItems);
-      localStorage.setItem("shoppingCart", JSON.stringify(updatedItems));
+    dispatch({
+      type: "DELETE_ITEM",
+    });
 
-      setNotification(`${selectedIds.length} item(s) deleted successfully!`);
-      setNotificationType("error");
-      setTimeout(() => setNotification(""), 3000);
-
-      setSelectedIds([]); // Clear selection
-      setViewMode("list");
-    }
+    dispatch({
+      type: "SET_VIEW_MODE",
+      payload: "LIST_ITEM",
+    });
   }
 
   return (
-    
-    <div className='App'>
-    
-    {notification && (
-      <div className={`simple-toast ${notificationType}`}>
-        {notification}
-      </div>
-    )}
-
+    <div className="App">
+      {state.notification && (
+        <div className={`simple-toast ${state.notificationType}`}>
+          {state.notification}
+        </div>
+      )}
 
       <h1> Interactive Shoping Cart</h1>
       <hr />
       <ul>
         <li>
-          <button onClick={handleListItems}>List Items</button>
-        </li>
-        <li>
           <button onClick={handleAddItem}>Add Item</button>
         </li>
         <li>
-          <button disabled={(selectedIds.length !== 1)} onClick={handleUpdateItem}>Update Item</button>
+          <button
+            disabled={state.selectedIds.length !== 1}
+            onClick={handleUpdateItem}
+          >
+            Update Item
+          </button>
         </li>
         <li>
-          <button disabled={!(selectedIds.length>0)} onClick={handleDeleteItem}>Delete Item</button>
+          <button
+            disabled={!(state.selectedIds.length > 0)}
+            onClick={handleDeleteItem}
+          >
+            Delete Item
+          </button>
         </li>
       </ul>
       <hr />
-      {viewMode === "list" && <ListItems 
-        items={items} 
-        selectedIds={selectedIds} 
-        setSelectedIds={setSelectedIds}
-        setNotificationType={setNotificationType}
-      />
-      }
-
-      {viewMode === "add" && (
-        <ItemForm
-          mode="add"
-          items={items}
-          setItems={setItems}
-          setNotification={setNotification}
-          setNotificationType={setNotificationType}
-          setViewMode={setViewMode}
+      {state.viewMode === "LIST_ITEM" && (
+        <ListItems
+          items={state.items}
+          selectedIds={state.selectedIds}
+          dispatch={dispatch}
         />
       )}
 
-      {viewMode === "update" && (
-        <ItemForm
-          mode="update"
-          selectedIds={selectedIds}   
-          items={items}
-          setItems={setItems}
-          setNotification={setNotification}
-          setNotificationType={setNotificationType}
-          setViewMode={setViewMode}
-        />
+      {state.viewMode === "ADD_ITEM" && (
+        <ItemForm mode="ADD_ITEM" items={state.items} dispatch={dispatch} />
       )}
 
-
+      {state.viewMode === "UPDATE_ITEM" && (
+        <ItemForm
+          mode="UPDATE_ITEM"
+          selectedIds={state.selectedIds}
+          items={state.items}
+          dispatch={dispatch}
+        />
+      )}
     </div>
   );
 }

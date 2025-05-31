@@ -1,10 +1,14 @@
-import { useReducer, useEffect } from "react";
+import { useReducer, useEffect, useContext } from "react";
 import formReducer from "./formReducer";
+import { ShoppingCartContext } from "./ShoppingCartContext";
 
-function ItemForm({ mode, selectedIds, items, dispatch }) {
+function ItemForm() {
+
+  const {state, dispatch} = useContext(ShoppingCartContext);
+  
   const initialItem =
-    mode === "UPDATE_ITEM"
-      ? items.find((item) => item.id === selectedIds[0])
+    state.viewMode === "UPDATE_ITEM"
+      ? state.items.find((item) => item.id === state.selectedIds[0])
       : null;
 
   const initialFormState = {
@@ -13,13 +17,13 @@ function ItemForm({ mode, selectedIds, items, dispatch }) {
     imageUrl: "",
     purchased: false,
     error: "",
-    isDisabled: mode !== "UPDATE_ITEM",
+    isDisabled: state.viewMode !== "UPDATE_ITEM",
   };
 
   const [formState, formDispatch] = useReducer(formReducer, initialFormState);
 
   useEffect(() => {
-    if (mode === "UPDATE_ITEM" && initialItem) {
+    if (state.viewMode === "UPDATE_ITEM" && initialItem) {
       formDispatch({
         type: "SET_ALL_FIELDS",
         payload: {
@@ -30,13 +34,13 @@ function ItemForm({ mode, selectedIds, items, dispatch }) {
         },
       });
     }
-  }, [mode, initialItem]);
+  }, [state.viewMode, initialItem]);
 
   function handleFormSubmit(e) {
     e.preventDefault();
 
     const newItem = {
-      id: mode === "UPDATE_ITEM" ? initialItem.id : Date.now(),
+      id: state.viewMode === "UPDATE_ITEM" ? initialItem.id : Date.now(),
       name: formState.itemName,
       count: formState.quantity,
       imageUrl: formState.imageUrl,
@@ -44,11 +48,11 @@ function ItemForm({ mode, selectedIds, items, dispatch }) {
     };
 
     dispatch({
-      type: mode === "UPDATE_ITEM" ? "UPDATE_ITEM" : "ADD_ITEM",
+      type: state.viewMode === "UPDATE_ITEM" ? "UPDATE_ITEM" : "ADD_ITEM",
       payload: newItem,
     });
 
-    if (mode === "UPDATE_ITEM") {
+    if (state.viewMode === "UPDATE_ITEM") {
       dispatch({ type: "SET_SELECTED_IDS", payload: [] });
     }
 
@@ -154,7 +158,7 @@ function ItemForm({ mode, selectedIds, items, dispatch }) {
 
   return (
     <>
-      <h2>{mode === "UPDATE_ITEM" ? "Update Item" : "Add New Item"}</h2>
+      <h2>{state.viewMode === "UPDATE_ITEM" ? "Update Item" : "Add New Item"}</h2>
       <form className="add-item" onSubmit={handleFormSubmit}>
         <div className="form-row">
           <label>Enter Name:</label>
@@ -208,7 +212,7 @@ function ItemForm({ mode, selectedIds, items, dispatch }) {
         </div>
 
         <button type="submit" disabled={formState.isDisabled}>
-          {mode === "UPDATE_ITEM" ? "Update" : "Submit"}
+          {state.viewMode === "UPDATE_ITEM" ? "Update" : "Submit"}
         </button>
 
         {formState.error && (

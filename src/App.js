@@ -3,15 +3,9 @@ import { useEffect, useReducer } from "react";
 import ListItems from "./ListItems";
 import ItemForm from "./ItemForm";
 import { shoppingCartReducer } from "./shoppingCartReducer";
+import { ShoppingCartContext } from "./ShoppingCartContext";
 
 function App() {
-  const initialState = {
-    items: JSON.parse(localStorage.getItem("shoppingCart") || "[]"),
-    selectedIds: [],
-    viewMode: "LIST_ITEM",
-    notification: "",
-    notificationType: "info",
-  };
 
   const [state, dispatch] = useReducer(shoppingCartReducer, initialState);
 
@@ -50,7 +44,8 @@ function App() {
   }
 
   return (
-    <div className="App">
+    <ShoppingCartContext.Provider value={{state, dispatch}}>
+      <div className="App">
       {state.notification && (
         <div className={`simple-toast ${state.notificationType}`}>
           {state.notification}
@@ -83,26 +78,29 @@ function App() {
       <hr />
       {state.viewMode === "LIST_ITEM" && (
         <ListItems
-          items={state.items}
-          selectedIds={state.selectedIds}
-          dispatch={dispatch}
         />
       )}
 
       {state.viewMode === "ADD_ITEM" && (
-        <ItemForm mode="ADD_ITEM" items={state.items} dispatch={dispatch} />
+        <ItemForm mode="ADD_ITEM" />
       )}
 
       {state.viewMode === "UPDATE_ITEM" && (
         <ItemForm
           mode="UPDATE_ITEM"
-          selectedIds={state.selectedIds}
-          items={state.items}
-          dispatch={dispatch}
         />
       )}
     </div>
+    </ShoppingCartContext.Provider>
   );
 }
 
 export default App;
+
+const initialState = {
+    items: JSON.parse(localStorage.getItem("shoppingCart") || "[]"),
+    selectedIds: [],
+    viewMode: "LIST_ITEM",
+    notification: "",
+    notificationType: "info",
+  };

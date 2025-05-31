@@ -1,15 +1,20 @@
-import { useState } from "react";
-export default function ListItems({ items, selectedIds, dispatch }) {
+import { useContext, useState } from "react";
+import { ShoppingCartContext } from "./ShoppingCartContext";
+
+export default function ListItems() {
+
+  const {state, dispatch} = useContext(ShoppingCartContext);
+
   const [query, setQuery] = useState("");
 
-  const filteredItems = items.filter((item) =>
+  const filteredItems = state.items.filter((item) =>
     item.name.toLowerCase().includes(query.toLowerCase())
   );
 
   function handleSelectedIds(itemId) {
-    const updateSelection = selectedIds.includes(itemId)
-      ? selectedIds.filter((id) => id !== itemId)
-      : [...selectedIds, itemId];
+    const updateSelection = state.selectedIds.includes(itemId)
+      ? state.selectedIds.filter((id) => id !== itemId)
+      : [...state.selectedIds, itemId];
 
     dispatch({
       type: "SET_SELECTED_IDS",
@@ -19,7 +24,7 @@ export default function ListItems({ items, selectedIds, dispatch }) {
 
   function handleSelectAll() {
     //Todo: check if all items are selected if clicked again deselect all
-    if (filteredItems.length === selectedIds.length) {
+    if (filteredItems.length === state.selectedIds.length) {
       dispatch({
         type: "SET_SELECTED_IDS",
         payload: [],
@@ -60,7 +65,7 @@ export default function ListItems({ items, selectedIds, dispatch }) {
               <input
                 type="checkbox"
                 checked={
-                  items.length > 0 && selectedIds.length === items.length
+                  state.items.length > 0 && state.selectedIds.length === state.items.length
                 }
                 onChange={handleSelectAll}
               />
@@ -91,7 +96,7 @@ export default function ListItems({ items, selectedIds, dispatch }) {
                 <td>
                   <input
                     type="checkbox"
-                    checked={selectedIds.includes(item.id)}
+                    checked={state.selectedIds.includes(item.id)}
                     onChange={() => handleSelectedIds(item.id)}
                   />
                 </td>
@@ -101,7 +106,7 @@ export default function ListItems({ items, selectedIds, dispatch }) {
         </tbody>
       </table>
       <p className="item-count">
-        {selectedIds.length} item{selectedIds.length !== 1 ? "s" : ""} selected
+        {state.selectedIds.length} item{state.selectedIds.length !== 1 ? "s" : ""} selected
       </p>
     </>
   );
